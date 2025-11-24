@@ -6,7 +6,12 @@ import Sidebar from "./components/Sidebar";
 import AddSubModal from "./components/AddSubModal";
 import PaywallModal from "./components/PaywallModal";
 import PlanBanner from "./components/PlanBanner";
-
+import TrustBar from "./components/TrustBar";
+import FeatureGrid from "./components/FeatureGrid";
+import PricingSection from "./components/PricingSection";
+import FeatureBenefits from "./components/FeatureBenefits";
+import Testimonials from "./components/Testimonials";
+import FAQ from "./components/FAQ";
 
 // 1) PUT YOUR REAL PAYPAL (OR OTHER) PAYMENT LINK HERE
 // Example for PayPal: "https://www.paypal.com/checkoutnow?token=YOUR_TOKEN"
@@ -114,7 +119,7 @@ export default function App() {
     setSubs((prev) => prev.filter((s) => s.id !== id));
   };
 
-  // 2) PayPal / payment link upgrade handler
+  // PayPal / payment link upgrade handler
   const handleUpgrade = () => {
     if (
       !PAYMENT_LINK ||
@@ -140,7 +145,7 @@ export default function App() {
     <div className="min-h-screen">
       <Navbar isPremium={isPremium} openPaywall={() => setIsPaywallOpen(true)} />
 
-      <main className="max-w-6xl mx-auto px-4 md:px-6 lg:px-10 pb-12 pt-6 space-y-10">
+      <main className="max-w-6xl mx-auto px-4 md:px-6 lg:px-10 pb-12 pt-6 space-y-8 md:space-y-10">
         {/* === Landing hero section === */}
         <section className="relative overflow-hidden rounded-3xl border border-slate-800/80 bg-slate-950/80 shadow-[0_30px_80px_rgba(0,0,0,0.85)] px-5 py-7 md:px-8 md:py-9">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.3),_transparent_60%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.25),_transparent_55%)]" />
@@ -151,15 +156,16 @@ export default function App() {
                 SubTrack • For Creators & Freelancers
               </p>
               <h1 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-slate-50 leading-tight">
-                See exactly how much your{" "}
+                Luxury-grade overview of how your{" "}
                 <span className="bg-gradient-to-r from-indigo-400 via-sky-300 to-fuchsia-300 bg-clip-text text-transparent">
-                  subscriptions
+                  tools
                 </span>{" "}
-                are eating your creator income.
+                silently tax your creator income.
               </h1>
               <p className="text-sm md:text-[15px] text-slate-300/90 max-w-xl">
-                Track Adobe, Notion, AI tools, editing software and more in one clean
-                view. Free for 3 tools, or unlock unlimited for serious creators.
+                Track Adobe, Notion, AI tools, editing software, music, storage and
+                more. Built to feel like a premium finance dashboard, tuned for
+                solo creators.
               </p>
 
               <div className="flex flex-wrap gap-3 pt-2">
@@ -220,31 +226,51 @@ export default function App() {
                   </span>
                 </div>
                 <p className="mt-2 text-[11px] text-slate-500">
-                  Imagine channeling even half of this into ads or better production.
+                  Imagine channeling even half of this into ads, better audio, or a
+                  dedicated editor.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
+        {/* Trust / reassurance strip */}
+        <TrustBar
+          isPremium={isPremium}
+          openPaywall={() => setIsPaywallOpen(true)}
+        />
+
+        {/* Feature grid: design + creator + financial clarity */}
+        <FeatureGrid />
+
+        {/* New: pricing, benefits, testimonials, FAQ */}
+        <PricingSection
+          isPremium={isPremium}
+          openPaywall={() => setIsPaywallOpen(true)}
+        />
+
+        <FeatureBenefits />
+
+        <Testimonials />
+
+        <FAQ />
+
         {/* === App dashboard section === */}
-<section id="app-section" className="space-y-6 md:space-y-8">
-  {/* Free plan banner */}
-  <PlanBanner
-    isPremium={isPremium}
-    openPaywall={() => setIsPaywallOpen(true)}
-  />
+        <section id="app-section" className="space-y-6 md:space-y-8">
+          {/* Free plan banner */}
+          <PlanBanner
+            isPremium={isPremium}
+            openPaywall={() => setIsPaywallOpen(true)}
+          />
 
-  <StatsHeader
-    totalMonthly={totalMonthly}
-    totalYearly={totalYearly}
-    isPremium={isPremium}
-    openPaywall={() => setIsPaywallOpen(true)}
-  />
+          <StatsHeader
+            totalMonthly={totalMonthly}
+            totalYearly={totalYearly}
+            isPremium={isPremium}
+            openPaywall={() => setIsPaywallOpen(true)}
+          />
 
-  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    {/* ...rest stays the same */}
-
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 backdrop-blur-xl bg-slate-900/40 border border-slate-700/60 shadow-xl shadow-black/40 rounded-3xl p-5 md:p-6">
               <SubscriptionList
                 subs={subs}
