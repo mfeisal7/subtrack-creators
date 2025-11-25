@@ -12,20 +12,44 @@ import PricingSection from "./components/PricingSection";
 import FeatureBenefits from "./components/FeatureBenefits";
 import Testimonials from "./components/Testimonials";
 import FAQ from "./components/FAQ";
+import { useAuth } from "./context/AuthContext";
 
-// 1) PUT YOUR REAL PAYPAL (OR OTHER) PAYMENT LINK HERE
-// Example for PayPal: "https://www.paypal.com/checkoutnow?token=YOUR_TOKEN"
+
+// Put your real PayPal (or other) payment link here:
 const PAYMENT_LINK = "https://your-paypal-or-payment-link-here";
 
-// Helper: figure out if user is premium from URL / localStorage
+// Default subs used for new users / guests
+const DEFAULT_SUBS = [
+  {
+    id: "seed-1",
+    name: "Adobe Creative Cloud",
+    cost: 52.99,
+    cycle: "monthly",
+    category: "Creative Tools",
+  },
+  {
+    id: "seed-2",
+    name: "Notion",
+    cost: 10,
+    cycle: "monthly",
+    category: "Productivity",
+  },
+  {
+    id: "seed-3",
+    name: "Descript",
+    cost: 15,
+    cycle: "monthly",
+    category: "Editing",
+  },
+];
+
+// Premium from URL/localStorage
 function getInitialPremium() {
   try {
     const url = new URL(window.location.href);
 
-    // If payment provider redirected with ?upgraded=true → mark premium and clean URL
     if (url.searchParams.get("upgraded") === "true") {
       url.searchParams.delete("upgraded");
-
       const searchString = url.searchParams.toString();
       const cleanUrl =
         url.pathname +
@@ -37,60 +61,107 @@ function getInitialPremium() {
       return true;
     }
   } catch (e) {
-    // ignore URL parsing errors
+    // ignore parse issues
   }
 
-  // Fallback to localStorage
   return localStorage.getItem("subtrack_premium") === "true";
 }
 
 export default function App() {
-  // Subscriptions
-  const [subs, setSubs] = useState(() => {
-    const saved = localStorage.getItem("subtrack_data");
-    return saved
-      ? JSON.parse(saved)
-      : [
-          {
-            id: 1,
-            name: "Adobe Creative Cloud",
-            cost: 52.99,
-            cycle: "monthly",
-            category: "Creative Tools",
-          },
-          {
-            id: 2,
-            name: "Notion",
-            cost: 10,
-            cycle: "monthly",
-            category: "Productivity",
-          },
-          {
-            id: 3,
-            name: "Descript",
-            cost: 15,
-            cycle: "monthly",
-            category: "Editing",
-          },
-        ];
-  });
+  const { user } = useAuth();
 
-  // Premium state
+  // State
+  const [subs, setSubs] = useState(DEFAULT_SUBS);
+  const [loadingSubs, setLoadingSubs] = useState(true);
+
   const [isPremium, setIsPremium] = useState(getInitialPremium);
-
-  // UI state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
 
-  // Persist subs
+  // Load subs depending on whether user is logged in or not
   useEffect(() => {
-    localStorage.setItem("subtrack_data", JSON.stringify(subs));
-  }, [subs]);
+    let cancelled = false;
 
-  // Persist premium
+    async function load() {
+      setLoadingSubs(true);
+
+      // If no user: use localStorage or default
+      if (!user) {
+        const saved = localStorage.getItem("subtrack_data");
+        const localSubs = saved ? JSON.parse(saved) : DEFAULT_SUBS;
+        if (!cancelled) {
+          setSubs(localSubs);
+          setLoadingSubs(false);
+        }
+        return;
+      }
+
+      // User present: load from Firestore
+      try {
+        const remote = await fetchUserSubscriptions(user.uid);
+        if (!cancelled) {
+          setSubs(remote.length ? remote : DEFAULT_SUBS);
+        }
+      } catch (err) {
+        console.error("Failed to load Firestore subs:", err);
+        if (!cancelled) {
+          setSubs(DEFAULT_SUBS);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingSubs(false);
+        }
+      }
+    }
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  // LocalStorage persistence only for guests (no user)
+  useEffect(() => {
+    if (!user) {
+      localStorage.setItem("subtrack_data", JSON.stringify(subs));
+    }
+  }, [subs, user]);
+
+  // Persist premium flag locally
   useEffect(() => {
     localStorage.setItem("subtrack_premium", isPremium ? "true" : "false");
   }, [isPremium]);
+
+  // Fetch premium flag from Firestore when user logs in
+  useEffect(() => {
+    if (!user) return;
+
+    let cancelled = false;
+    async function syncPremium() {
+      try {
+        const remotePremium = await fetchUserPremium(user.uid);
+        if (!cancelled && remotePremium) {
+          setIsPremium(true);
+        }
+      } catch (err) {
+        console.error("Failed to fetch user premium:", err);
+      }
+    }
+    syncPremium();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  // When premium becomes true and user exists, mirror to Firestore
+  useEffect(() => {
+    if (!isPremium || !user) return;
+    setUserPremiumFlag(user.uid, true).catch((err) =>
+      console.error("Failed to set premium in Firestore:", err)
+    );
+  }, [isPremium, user]);
 
   // Totals & categories
   const totalMonthly = subs.reduce(
@@ -105,18 +176,44 @@ export default function App() {
     return acc;
   }, {});
 
-  // Free tier add logic
-  const handleAddSub = (sub) => {
+  // Add subscription (Firestore if logged in, else local)
+  const handleAddSub = async (sub) => {
     if (!isPremium && subs.length >= 3) {
       setIsModalOpen(false);
       setIsPaywallOpen(true);
       return;
     }
-    setSubs((prev) => [...prev, { ...sub, id: Date.now() }]);
+
+    try {
+      if (user) {
+        const saved = await upsertUserSubscription(user.uid, sub);
+        setSubs((prev) => [...prev, saved]);
+      } else {
+        const newSub = {
+          ...sub,
+          id: Date.now().toString(),
+          cost: Number(sub.cost) || 0,
+        };
+        setSubs((prev) => [...prev, newSub]);
+      }
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error("Failed to add subscription:", err);
+      alert("Failed to add subscription. Please try again.");
+    }
   };
 
-  const handleDelete = (id) => {
-    setSubs((prev) => prev.filter((s) => s.id !== id));
+  // Delete subscription
+  const handleDelete = async (id) => {
+    try {
+      if (user) {
+        await deleteUserSubscription(user.uid, id);
+      }
+      setSubs((prev) => prev.filter((s) => s.id !== id));
+    } catch (err) {
+      console.error("Failed to delete subscription:", err);
+      alert("Failed to delete subscription.");
+    }
   };
 
   // PayPal / payment link upgrade handler
@@ -133,7 +230,7 @@ export default function App() {
     window.location.href = PAYMENT_LINK;
   };
 
-  // Scroll from hero CTA down to the app section
+  // Scroll from hero CTA to app dashboard
   const scrollToApp = () => {
     const el = document.getElementById("app-section");
     if (el) {
@@ -234,16 +331,13 @@ export default function App() {
           </div>
         </section>
 
-        {/* Trust / reassurance strip */}
         <TrustBar
           isPremium={isPremium}
           openPaywall={() => setIsPaywallOpen(true)}
         />
 
-        {/* Feature grid: design + creator + financial clarity */}
         <FeatureGrid />
 
-        {/* New: pricing, benefits, testimonials, FAQ */}
         <PricingSection
           isPremium={isPremium}
           openPaywall={() => setIsPaywallOpen(true)}
@@ -257,7 +351,6 @@ export default function App() {
 
         {/* === App dashboard section === */}
         <section id="app-section" className="space-y-6 md:space-y-8">
-          {/* Free plan banner */}
           <PlanBanner
             isPremium={isPremium}
             openPaywall={() => setIsPaywallOpen(true)}
@@ -272,11 +365,15 @@ export default function App() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 backdrop-blur-xl bg-slate-900/40 border border-slate-700/60 shadow-xl shadow-black/40 rounded-3xl p-5 md:p-6">
-              <SubscriptionList
-                subs={subs}
-                onDelete={handleDelete}
-                openModal={() => setIsModalOpen(true)}
-              />
+              {loadingSubs ? (
+                <p className="text-sm text-slate-400">Loading your tools…</p>
+              ) : (
+                <SubscriptionList
+                  subs={subs}
+                  onDelete={handleDelete}
+                  openModal={() => setIsModalOpen(true)}
+                />
+              )}
             </div>
 
             <div className="backdrop-blur-xl bg-slate-900/40 border border-slate-700/60 shadow-xl shadow-black/40 rounded-3xl p-5 md:p-6">
@@ -291,7 +388,10 @@ export default function App() {
       </main>
 
       {isModalOpen && (
-        <AddSubModal close={() => setIsModalOpen(false)} onSubmit={handleAddSub} />
+        <AddSubModal
+          close={() => setIsModalOpen(false)}
+          onSubmit={handleAddSub}
+        />
       )}
 
       {isPaywallOpen && (
