@@ -17,7 +17,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [initializing, setInitializing] = useState(true);
 
-  // Monitor login status
+  // Listen for auth state changes
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser || null);
@@ -38,7 +38,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Email/password login (optional use later)
+  // Email/password login (optional)
   const signInWithEmail = async (email, password) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
@@ -48,7 +48,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Email/password signup (optional)
+  // Email/password sign-up (optional)
   const signUpWithEmail = async (email, password) => {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
@@ -58,6 +58,7 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Sign out
   const signOutUser = async () => {
     try {
       await signOut(auth);
