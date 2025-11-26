@@ -16,7 +16,8 @@ export default function Sidebar({ categories, totalMonthly, totalYearly }) {
               <div
                 className="h-full bg-indigo-500 rounded-full"
                 style={{
-                  width: `${(categories[cat] / totalMonthly) * 100}%`,
+                  width: `${totalMonthly > 0 ? (categories[cat] / totalMonthly) * 100 : 0}%`,
+
                 }}
               ></div>
             </div>
