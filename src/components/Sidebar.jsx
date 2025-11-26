@@ -29,9 +29,7 @@ export default function Sidebar({ categories, totalMonthly, totalYearly }) {
                     <span>{cat}</span>
                     <span>
                       ${amount.toFixed(2)} ·{" "}
-                      {totalMonthly > 0
-                        ? `${percentage.toFixed(0)}%`
-                        : "0%"}
+                      {totalMonthly > 0 ? `${percentage.toFixed(0)}%` : "0%"}
                     </span>
                   </div>
                   <div className="h-2 w-full bg-slate-800/80 rounded-full overflow-hidden">
@@ -51,7 +49,7 @@ export default function Sidebar({ categories, totalMonthly, totalYearly }) {
         )}
       </div>
 
-      {/* Insight / “referral-style” text block */}
+      {/* Insight */}
       <div className="rounded-2xl border border-indigo-500/40 bg-gradient-to-br from-indigo-500/20 via-slate-950 to-slate-950 px-4 py-4 md:px-5 md:py-5 shadow-[0_18px_40px_rgba(15,23,42,0.9)]">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-200 mb-2">
           Creator insight
@@ -70,9 +68,8 @@ export default function Sidebar({ categories, totalMonthly, totalYearly }) {
         </p>
 
         <p className="mt-2 text-[11px] text-indigo-100/90">
-          Even reallocating a small part of that into thumbnails, editing, or
-          ads could bring you more views, clients, or revenue than another
-          forgotten subscription.
+          Even reallocating a small part of that into thumbnails, editing, or ads
+          could bring you more views, clients, or revenue than another forgotten subscription.
         </p>
       </div>
     </div>

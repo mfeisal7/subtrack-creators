@@ -5,25 +5,23 @@ import AccountDropdown from "./AccountDropdown";
 
 export default function Navbar({ isPremium, openPaywall }) {
   const { user, signInWithGoogle } = useAuth();
-
-  const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  const toggleAccount = () => setIsAccountOpen((prev) => !prev);
+  const toggleDropdown = () => setIsOpen((prev) => !prev);
 
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClick(e) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target)
-      ) {
-        setIsAccountOpen(false);
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
+
+  const initial = user?.email?.charAt(0).toUpperCase() ?? "U";
 
   return (
     <nav className="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-xl">
@@ -45,7 +43,7 @@ export default function Navbar({ isPremium, openPaywall }) {
         </div>
 
         {/* Right: plan + actions */}
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex items-center gap-3 relative">
           {/* Plan pill */}
           <span className="hidden sm:inline-flex items-center rounded-full border border-slate-700/80 bg-slate-900/80 px-3 py-1 text-[11px] font-medium text-slate-200">
             <span
@@ -56,7 +54,7 @@ export default function Navbar({ isPremium, openPaywall }) {
             {isPremium ? "Pro plan" : "Free plan"}
           </span>
 
-          {/* Upgrade button (only when not Pro) */}
+          {/* Upgrade button (only if not Pro) */}
           {!isPremium && (
             <button
               onClick={openPaywall}
@@ -75,20 +73,15 @@ export default function Navbar({ isPremium, openPaywall }) {
               Sign in
             </button>
           ) : (
-            <div
-              ref={dropdownRef}
-              className="relative inline-flex items-center"
-            >
+            <div ref={dropdownRef} className="relative">
               <button
-                onClick={toggleAccount}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-900 shadow-md shadow-slate-900/40 hover:bg-white transition"
+                onClick={toggleDropdown}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-900 shadow-md shadow-black/40 hover:bg-white hover:scale-[1.03] transition"
               >
-                {user.email?.charAt(0).toUpperCase() ?? "U"}
+                {initial}
               </button>
 
-              {isAccountOpen && (
-                <AccountDropdown isPremium={isPremium} />
-              )}
+              {isOpen && <AccountDropdown isPremium={isPremium} />}
             </div>
           )}
         </div>
