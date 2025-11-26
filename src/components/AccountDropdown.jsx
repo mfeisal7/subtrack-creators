@@ -1,10 +1,13 @@
 export default function AccountDropdown({ close }) {
   return (
-    <div className="absolute right-0 mt-2 w-44 bg-slate-800 border border-slate-700 rounded-xl shadow-xl p-3 z-50">
-      <p className="text-xs text-slate-300 mb-2">
+    <div className="absolute right-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-xl shadow-xl p-3 z-50 animate-fadeIn">
+      
+      {/* EMAIL */}
+      <p className="text-xs text-slate-300 mb-3">
         {localStorage.getItem("subtrack_email") || "Logged in user"}
       </p>
 
+      {/* LOGOUT */}
       <button
         onClick={() => {
           localStorage.removeItem("subtrack_email");
@@ -17,8 +20,9 @@ export default function AccountDropdown({ close }) {
         Sign out
       </button>
 
+      {/* CLOSE */}
       <button
-        className="w-full text-left text-xs mt-2 text-slate-400 hover:text-white"
+        className="w-full text-left text-xs mt-3 text-slate-400 hover:text-white"
         onClick={close}
       >
         Close
