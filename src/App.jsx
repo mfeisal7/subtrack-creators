@@ -14,7 +14,9 @@ import PricingSection from "./components/PricingSection";
 import FeatureBenefits from "./components/FeatureBenefits";
 import Testimonials from "./components/Testimonials";
 import FAQ from "./components/FAQ";
+import ContactSupport from "./components/ContactSupport";
 import { useAuth } from "./context/AuthContext";
+
 
 // ✅ IMPORT THE SUBSCRIPTION SERVICE FUNCTIONS
 import {
@@ -383,6 +385,7 @@ export default function App() {
         <FeatureBenefits />
         <Testimonials />
         <FAQ />
+	<ContactSupport />
       </main>
 
       {isModalOpen && (
