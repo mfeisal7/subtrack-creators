@@ -1,6 +1,7 @@
 // src/App.jsx
 import { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
+import ReferralBar from "./components/ReferralBar";
 import StatsHeader from "./components/StatsHeader";
 import SubscriptionList from "./components/SubscriptionList";
 import Sidebar from "./components/Sidebar";
@@ -243,7 +244,9 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50">
       <Navbar isPremium={isPremium} openPaywall={() => setIsPaywallOpen(true)} />
+      <ReferralBar />
 
+      
       <main className="max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-16 pt-6 md:pt-10">
         {/* Hero */}
         <section className="grid gap-8 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] items-center">
