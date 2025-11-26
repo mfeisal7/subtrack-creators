@@ -16,7 +16,7 @@ import { useAuth } from "./context/AuthContext";
 
 
 // Put your real PayPal (or other) payment link here:
-const PAYMENT_LINK = "https://www.paypal.com/ncp/payment/8TPHFR6ZHSKDQ";
+const PAYMENT_LINK ="https://www.paypal.com/ncp/payment/8TPHFR6ZHSKDQ"
 
 
 // Default subs used for new users / guests
