@@ -1,35 +1,27 @@
-// src/components/AccountDropdown.jsx
-import { useAuth } from "../context/AuthContext";
-
-export default function AccountDropdown({ close, logout }) {
-  const { user } = useAuth();
-
-  if (!user) return null;
-
-  const email = user.email || "User";
-
-  // Close dropdown when clicking an item
-  const handleLogout = () => {
-    logout();
-    close();
-  };
-
+export default function AccountDropdown({ close }) {
   return (
-    <div className="absolute right-0 mt-2 w-56 rounded-xl bg-slate-900 border border-slate-700 shadow-xl z-50 p-4">
-      <div className="pb-3 border-b border-slate-700">
-        <p className="text-sm font-semibold text-slate-100 truncate">
-          {email}
-        </p>
-        <p className="text-xs text-slate-400 mt-1">
-          Creator Account
-        </p>
-      </div>
+    <div className="absolute right-0 mt-2 w-44 bg-slate-800 border border-slate-700 rounded-xl shadow-xl p-3 z-50">
+      <p className="text-xs text-slate-300 mb-2">
+        {localStorage.getItem("subtrack_email") || "Logged in user"}
+      </p>
 
       <button
-        onClick={handleLogout}
-        className="mt-4 w-full text-left text-sm text-red-400 hover:text-red-300 transition"
+        onClick={() => {
+          localStorage.removeItem("subtrack_email");
+          localStorage.removeItem("subtrack_user_letter");
+          localStorage.removeItem("subtrack_premium");
+          window.location.href = "/";
+        }}
+        className="w-full text-left text-sm text-red-300 px-2 py-1 hover:bg-red-500/10 rounded"
       >
         Sign out
+      </button>
+
+      <button
+        className="w-full text-left text-xs mt-2 text-slate-400 hover:text-white"
+        onClick={close}
+      >
+        Close
       </button>
     </div>
   );
