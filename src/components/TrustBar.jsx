@@ -1,32 +1,40 @@
-export default function TrustBar({ isPremium, openPaywall }) {
+// src/components/TrustBar.jsx
+
+export default function TrustBar() {
   return (
-    <section className="mt-1">
-      <div className="rounded-2xl border border-slate-800/80 bg-slate-950/80 px-4 py-3 md:px-6 md:py-3.5 flex flex-col md:flex-row gap-3 md:items-center justify-between text-[11px] md:text-xs text-slate-300 shadow-[0_18px_40px_rgba(0,0,0,0.6)]">
-        <div className="flex flex-wrap gap-3">
-          <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            <span className="font-medium text-slate-100">
-              One-time payment, no subscriptions
+    <section
+      className="mx-auto mt-6 w-full max-w-5xl rounded-2xl bg-slate-900/90 px-4 py-3 text-xs text-slate-100 shadow-[0_18px_60px_rgba(15,23,42,0.55)] ring-1 ring-white/5"
+      aria-label="Trust and safety information"
+    >
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        {/* Left: one-line promise */}
+        <div className="flex items-center gap-2">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/15 text-[13px] text-emerald-400 ring-1 ring-emerald-500/40">
+            ✓
+          </div>
+          <p className="text-[13px] font-medium text-slate-100">
+            One-time payment, no subscriptions.{" "}
+            <span className="font-normal text-slate-300">
+              Unlock unlimited tools in your stack forever.
             </span>
-          </div>
-          <div className="flex items-center gap-2 text-slate-400">
-            <span className="h-1.5 w-1.5 rounded-full bg-sky-400" />
-            <span>Secure checkout via PayPal</span>
-          </div>
-          <div className="flex items-center gap-2 text-slate-400">
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-            <span>Built for creators & freelancers</span>
-          </div>
+          </p>
         </div>
 
-        {!isPremium && (
-          <button
-            onClick={openPaywall}
-            className="inline-flex self-start md:self-auto items-center justify-center rounded-full border border-slate-600/70 bg-slate-900/80 px-3 py-1.5 text-[11px] font-semibold text-slate-100 hover:border-indigo-400/80 hover:text-white transition"
-          >
-            Upgrade via PayPal
-          </button>
-        )}
+        {/* Right: reassurance bullets */}
+        <div className="flex flex-wrap items-center gap-3 text-[11px] md:justify-end">
+          <span className="rounded-full bg-slate-800/80 px-3 py-1 text-slate-200 ring-1 ring-slate-700/70">
+            <span className="mr-1 text-emerald-400">●</span>
+            Secure PayPal checkout
+          </span>
+          <span className="rounded-full bg-slate-800/80 px-3 py-1 text-slate-200 ring-1 ring-slate-700/70">
+            <span className="mr-1 text-amber-300">★</span>
+            Built for solo creators & freelancers
+          </span>
+          <span className="rounded-full bg-slate-800/80 px-3 py-1 text-slate-200 ring-1 ring-slate-700/70">
+            <span className="mr-1 text-sky-300">↺</span>
+            Access the dashboard instantly after payment
+          </span>
+        </div>
       </div>
     </section>
   );

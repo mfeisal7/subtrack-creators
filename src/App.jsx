@@ -15,10 +15,11 @@ import FeatureBenefits from "./components/FeatureBenefits";
 import Testimonials from "./components/Testimonials";
 import FAQ from "./components/FAQ";
 import ContactSupport from "./components/ContactSupport";
+import HowItWorks from "./components/HowItWorks";
+import ChangelogSection from "./components/ChangelogSection";
 import { useAuth } from "./context/AuthContext";
 
-
-// ✅ IMPORT THE SUBSCRIPTION SERVICE FUNCTIONS
+// Firebase subscription services
 import {
   fetchUserSubscriptions,
   fetchUserPremium,
@@ -27,10 +28,10 @@ import {
   deleteUserSubscription,
 } from "./services/subscriptions";
 
-// Your PayPal link
+// ✅ Your real PayPal link
 const PAYMENT_LINK = "https://www.paypal.com/ncp/payment/8TPHFR6ZHSKDQ";
 
-// Default subs for new/guest users
+// Seed subs for new/guest users
 const DEFAULT_SUBS = [
   {
     id: "seed-1",
@@ -55,13 +56,14 @@ const DEFAULT_SUBS = [
   },
 ];
 
-// Read premium from URL/localStorage
+// Read premium state from URL/localStorage
 function getInitialPremium() {
   try {
     const url = new URL(window.location.href);
 
     if (url.searchParams.get("upgraded") === "true") {
       url.searchParams.delete("upgraded");
+
       const searchString = url.searchParams.toString();
       const cleanUrl =
         url.pathname + (searchString ? "?" + searchString : "") + url.hash;
@@ -70,7 +72,7 @@ function getInitialPremium() {
       localStorage.setItem("subtrack_premium", "true");
       return true;
     }
-  } catch (e) {
+  } catch {
     // ignore
   }
 
@@ -80,25 +82,24 @@ function getInitialPremium() {
 export default function App() {
   const { user } = useAuth();
 
-  // State
   const [subs, setSubs] = useState(DEFAULT_SUBS);
   const [loadingSubs, setLoadingSubs] = useState(true);
-
   const [isPremium, setIsPremium] = useState(getInitialPremium);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
 
-  // Load subscriptions (Firestore if user logged in, otherwise localStorage)
+  // Load subscriptions (Firestore if logged-in, else localStorage/defaults)
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
       setLoadingSubs(true);
 
-      // Guest mode: localStorage or defaults
+      // Guest mode
       if (!user) {
         const saved = localStorage.getItem("subtrack_data");
         const localSubs = saved ? JSON.parse(saved) : DEFAULT_SUBS;
+
         if (!cancelled) {
           setSubs(localSubs);
           setLoadingSubs(false);
@@ -106,7 +107,7 @@ export default function App() {
         return;
       }
 
-      // Logged-in: try Firestore
+      // Logged-in: Firestore
       try {
         const remote = await fetchUserSubscriptions(user.uid);
         if (!cancelled) {
@@ -125,18 +126,17 @@ export default function App() {
     }
 
     load();
-
     return () => {
       cancelled = true;
     };
   }, [user]);
 
-  // Persist subs to localStorage for quick reloads
+  // Persist subscriptions locally for fast reload
   useEffect(() => {
     localStorage.setItem("subtrack_data", JSON.stringify(subs));
   }, [subs]);
 
-  // Load & sync premium flag (Firestore + localStorage)
+  // Sync premium flag from Firestore when logged in
   useEffect(() => {
     let cancelled = false;
 
@@ -155,21 +155,21 @@ export default function App() {
     }
 
     checkPremium();
-
     return () => {
       cancelled = true;
     };
   }, [user]);
 
+  // Mirror premium into localStorage
   useEffect(() => {
     localStorage.setItem("subtrack_premium", isPremium ? "true" : "false");
   }, [isPremium]);
 
-  // Derived values
-  const totalMonthly = subs.reduce((acc, sub) => {
-    return acc + (sub.cycle === "monthly" ? sub.cost : sub.cost / 12);
-  }, 0);
-
+  // Derived numbers
+  const totalMonthly = subs.reduce(
+    (acc, sub) => acc + (sub.cycle === "monthly" ? sub.cost : sub.cost / 12),
+    0
+  );
   const totalYearly = totalMonthly * 12;
 
   const categories = subs.reduce((acc, sub) => {
@@ -178,10 +178,10 @@ export default function App() {
     return acc;
   }, {});
 
-  // Handlers
+  // Add subscription
   async function handleAddSub(newSub) {
-    // Paywall: free users limited to 3 subs
     if (!isPremium && subs.length >= 3) {
+      // hit free limit → open paywall
       setIsModalOpen(false);
       setIsPaywallOpen(true);
       return;
@@ -208,6 +208,7 @@ export default function App() {
     setIsModalOpen(false);
   }
 
+  // Delete subscription
   async function handleDelete(id) {
     setSubs((prev) => prev.filter((s) => s.id !== id));
 
@@ -220,11 +221,10 @@ export default function App() {
     }
   }
 
+  // Upgrade → open PayPal + mark as premium
   async function handleUpgrade() {
-    // Open PayPal link
     window.open(PAYMENT_LINK, "_blank", "noopener,noreferrer");
 
-    // You can later handle `?upgraded=true` return here
     try {
       if (user) {
         await setUserPremiumFlag(user.uid, true);
@@ -238,6 +238,7 @@ export default function App() {
     }
   }
 
+  // Scroll hero button down to dashboard
   function scrollToApp() {
     const el = document.getElementById("app-section");
     if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -245,12 +246,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50">
-      <Navbar isPremium={isPremium} openPaywall={() => setIsPaywallOpen(true)} />
+      <Navbar
+        isPremium={isPremium}
+        openPaywall={() => setIsPaywallOpen(true)}
+      />
       <ReferralBar />
 
-      
       <main className="max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-16 pt-6 md:pt-10">
-        {/* Hero */}
+        {/* HERO */}
         <section className="grid gap-8 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] items-center">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-[11px] text-emerald-200 shadow-sm shadow-emerald-900/40">
@@ -265,9 +268,9 @@ export default function App() {
             </h1>
 
             <p className="text-sm md:text-[15px] text-slate-300/90 max-w-xl">
-              Track Adobe, Notion, AI tools, editing software, music, storage and
-              more. Built to feel like a premium finance dashboard, tuned for
-              solo creators.
+              Track Adobe, Notion, AI tools, editing software, music, storage
+              and more. Built to feel like a premium finance dashboard, tuned
+              for solo creators.
             </p>
 
             <div className="flex flex-wrap gap-3 pt-2">
@@ -277,6 +280,7 @@ export default function App() {
               >
                 Start tracking now
               </button>
+
               {!isPremium && (
                 <button
                   onClick={() => setIsPaywallOpen(true)}
@@ -301,7 +305,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Hero side card */}
+          {/* HERO SIDE CARD */}
           <div className="hidden md:flex items-center justify-center">
             <div className="w-full max-w-sm rounded-3xl border border-slate-700/70 bg-slate-900/80 p-4 shadow-xl shadow-black/60">
               <p className="text-[11px] font-semibold text-slate-300 mb-3">
@@ -328,20 +332,18 @@ export default function App() {
                 </span>
               </div>
               <p className="mt-2 text-[11px] text-slate-500">
-                Imagine channeling even half of this into ads, better audio, or a
-                dedicated editor.
+                Imagine channeling even half of this into ads, better audio, or
+                a dedicated editor.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Trust bar */}
+        {/* TRUST BAR + FEATURES */}
         <TrustBar />
-
-        {/* Feature grid / story */}
         <FeatureGrid />
 
-        {/* App section */}
+        {/* MAIN APP DASHBOARD */}
         <section id="app-section" className="mt-10 md:mt-14 space-y-6">
           <PlanBanner
             isPremium={isPremium}
@@ -377,17 +379,24 @@ export default function App() {
           </div>
         </section>
 
-        {/* Pricing + marketing sections */}
+        {/* MARKETING / EXPLANATION SECTIONS */}
         <PricingSection
           isPremium={isPremium}
           openPaywall={() => setIsPaywallOpen(true)}
         />
+
+        <HowItWorks />
+
         <FeatureBenefits />
         <Testimonials />
+
+        <ChangelogSection />
+
         <FAQ />
-	<ContactSupport />
+        <ContactSupport />
       </main>
 
+      {/* MODALS */}
       {isModalOpen && (
         <AddSubModal
           close={() => setIsModalOpen(false)}
