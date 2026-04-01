@@ -19,6 +19,7 @@ import FAQ from "./components/FAQ";
 import ContactSupport from "./components/ContactSupport";
 import HowItWorks from "./components/HowItWorks";
 import ChangelogSection from "./components/ChangelogSection";
+import LoginModal from "./components/LoginModal";
 import { useAuth } from "./context/AuthContext";
 
 // Firebase subscription services
@@ -90,6 +91,7 @@ export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
   const [isEmailCaptureOpen, setIsEmailCaptureOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
 
   // Load subscriptions (Firestore if logged-in, else localStorage/defaults)
   useEffect(() => {
@@ -261,6 +263,7 @@ export default function App() {
       <Navbar
         isPremium={isPremium}
         openPaywall={() => setIsPaywallOpen(true)}
+        openLogin={() => setIsLoginOpen(true)}
       />
       <ReferralBar />
 
@@ -431,6 +434,10 @@ export default function App() {
           close={() => setIsEmailCaptureOpen(false)}
           totalMonthly={totalMonthly}
         />
+      )}
+
+      {isLoginOpen && (
+        <LoginModal close={() => setIsLoginOpen(false)} />
       )}
     </div>
   );
