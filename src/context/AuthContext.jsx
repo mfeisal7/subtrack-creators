@@ -23,49 +23,28 @@ export function AuthProvider({ children }) {
       setUser(firebaseUser || null);
       setInitializing(false);
     });
-
     return () => unsub();
   }, []);
 
-  // Google login
+  // Google login — throws so callers can show their own error UI
   const signInWithGoogle = async () => {
-    try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-    } catch (err) {
-      console.error("Google login failed:", err);
-      alert("Google sign-in failed. Check console for details.");
-    }
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(auth, provider);
   };
 
-  // Email/password login (optional)
+  // Email/password login — throws so callers can show their own error UI
   const signInWithEmail = async (email, password) => {
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (err) {
-      console.error("Email login failed:", err);
-      alert(err.message || "Sign in failed");
-    }
+    await signInWithEmailAndPassword(auth, email, password);
   };
 
-  // Email/password sign-up (optional)
+  // Email/password sign-up — throws so callers can show their own error UI
   const signUpWithEmail = async (email, password) => {
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-    } catch (err) {
-      console.error("Email sign-up failed:", err);
-      alert(err.message || "Sign up failed");
-    }
+    await createUserWithEmailAndPassword(auth, email, password);
   };
 
   // Sign out
   const signOutUser = async () => {
-    try {
-      await signOut(auth);
-    } catch (err) {
-      console.error("Sign out failed:", err);
-      alert("Sign-out failed.");
-    }
+    await signOut(auth);
   };
 
   const value = {
