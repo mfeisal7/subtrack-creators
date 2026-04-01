@@ -13,7 +13,7 @@
 //  Leave empty ("") and emails are saved to localStorage only
 //  until you wire up a real provider.
 // ─────────────────────────────────────────────────────────────────
-const EMAIL_FORM_ACTION = ""; // ← paste your form action URL here
+const EMAIL_FORM_ACTION = "https://app.convertkit.com/forms/9274216/subscriptions";
 
 import { useState } from "react";
 import { Icons } from "./Icon";
