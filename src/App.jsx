@@ -31,7 +31,7 @@ import {
   deleteUserSubscription,
 } from "./services/subscriptions";
 
-// ✅ Your real PayPal link
+// PayPal link — return_url sends users back with ?thanks=true for the success banner
 const PAYMENT_LINK = "https://www.paypal.com/ncp/payment/8TPHFR6ZHSKDQ";
 
 // Seed subs for new/guest users
@@ -59,27 +59,24 @@ const DEFAULT_SUBS = [
   },
 ];
 
-// Read premium state from URL/localStorage
+// Read premium state from Firestore/localStorage only — never from URL params
+// (URL param upgrade was removed: it was a security hole anyone could exploit)
 function getInitialPremium() {
+  return localStorage.getItem("subtrack_premium") === "true";
+}
+
+// Detect PayPal "thanks" redirect and show a success notice
+function getPaymentThanks() {
   try {
     const url = new URL(window.location.href);
-
-    if (url.searchParams.get("upgraded") === "true") {
-      url.searchParams.delete("upgraded");
-
-      const searchString = url.searchParams.toString();
-      const cleanUrl =
-        url.pathname + (searchString ? "?" + searchString : "") + url.hash;
-
+    if (url.searchParams.get("thanks") === "true") {
+      url.searchParams.delete("thanks");
+      const cleanUrl = url.pathname + (url.searchParams.toString() ? "?" + url.searchParams.toString() : "") + url.hash;
       window.history.replaceState({}, "", cleanUrl);
-      localStorage.setItem("subtrack_premium", "true");
       return true;
     }
-  } catch {
-    // ignore
-  }
-
-  return localStorage.getItem("subtrack_premium") === "true";
+  } catch { /* ignore */ }
+  return false;
 }
 
 export default function App() {
@@ -92,6 +89,7 @@ export default function App() {
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
   const [isEmailCaptureOpen, setIsEmailCaptureOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [showPaymentThanks] = useState(getPaymentThanks);
 
   // Load subscriptions (Firestore if logged-in, else localStorage/defaults)
   useEffect(() => {
@@ -265,27 +263,33 @@ export default function App() {
         openPaywall={() => setIsPaywallOpen(true)}
         openLogin={() => setIsLoginOpen(true)}
       />
+
+      {/* Payment success banner */}
+      {showPaymentThanks && (
+        <div className="bg-emerald-600 text-white text-center text-sm px-4 py-3 font-medium">
+          🎉 Payment received — thank you! Sign in above and your Pro access will be activated within a few hours.
+        </div>
+      )}
+
       <ReferralBar />
 
       <main className="max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-16 pt-6 md:pt-10">
         {/* HERO */}
         <section className="grid gap-8 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] items-center">
           <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-[11px] text-emerald-200 shadow-sm shadow-emerald-900/40">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              <span>New • Creator Stack Spend Tracker</span>
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-[11px] text-amber-200 shadow-sm shadow-amber-900/20">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+              <span>⚡ Only 27 founding spots left at $19 lifetime</span>
             </div>
 
             <h1 className="text-3xl md:text-4xl lg:text-[2.75rem] font-semibold leading-tight tracking-tight text-slate-50">
-              SubTrack shows how much of your
-              <span className="text-indigo-300"> creator income </span>
-              silently leaks into tools.
+              Most creators are leaking
+              <span className="text-indigo-300"> $200+/month </span>
+              into tools they forgot they had.
             </h1>
 
             <p className="text-sm md:text-[15px] text-slate-300/90 max-w-xl">
-              Track Adobe, Notion, AI tools, editing software, music, storage
-              and more. Built to feel like a premium finance dashboard, tuned
-              for solo creators.
+              SubTrack shows you exactly what your tool stack costs — Adobe, Notion, AI tools, editors, plugins and more — in a clean dashboard built for creators, not accountants.
             </p>
 
             <div className="flex flex-wrap gap-3 pt-2">
@@ -293,29 +297,27 @@ export default function App() {
                 onClick={scrollToApp}
                 className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 px-5 py-2.5 text-xs md:text-sm font-semibold text-white shadow-lg shadow-indigo-500/40 hover:brightness-110 active:scale-[0.98] transition"
               >
-                Start tracking now
+                See my tool burn →
               </button>
 
               {!isPremium && (
                 <button
                   onClick={() => setIsPaywallOpen(true)}
-                  className="inline-flex items-center gap-2 rounded-full border border-slate-600/70 bg-slate-950/60 px-4 py-2 text-xs md:text-sm font-medium text-slate-200 hover:border-indigo-400/80 hover:text-white transition"
+                  className="inline-flex items-center gap-2 rounded-full border border-amber-500/50 bg-amber-500/10 px-4 py-2 text-xs md:text-sm font-medium text-amber-200 hover:bg-amber-500/20 transition"
                 >
-                  Preview Pro features
+                  Get Pro — $19 lifetime
                 </button>
               )}
             </div>
 
             <div className="flex flex-wrap gap-6 pt-4 text-xs text-slate-400">
               <div>
-                <p className="text-slate-300 font-semibold">
-                  3 tools • Free forever
-                </p>
-                <p>No login, no card required to try it.</p>
+                <p className="text-slate-300 font-semibold">Free • 3 tools</p>
+                <p>No login, no card needed to start.</p>
               </div>
               <div>
-                <p className="text-slate-300 font-semibold">$5 once • Pro</p>
-                <p>Unlock unlimited tools via secure PayPal checkout.</p>
+                <p className="text-amber-300 font-semibold">$19 once • Pro ⚡</p>
+                <p>Unlimited tools. Regular price will be $9/mo.</p>
               </div>
             </div>
           </div>
