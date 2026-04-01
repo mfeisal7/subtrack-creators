@@ -20,6 +20,7 @@ import ContactSupport from "./components/ContactSupport";
 import HowItWorks from "./components/HowItWorks";
 import ChangelogSection from "./components/ChangelogSection";
 import LoginModal from "./components/LoginModal";
+import ProActivationModal from "./components/ProActivationModal";
 import { useAuth } from "./context/AuthContext";
 
 // Firebase subscription services
@@ -90,6 +91,14 @@ export default function App() {
   const [isEmailCaptureOpen, setIsEmailCaptureOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [showPaymentThanks] = useState(getPaymentThanks);
+  // Show activation modal when a logged-in non-premium user arrives after payment
+  const [isActivationOpen, setIsActivationOpen] = useState(false);
+
+  useEffect(() => {
+    if (showPaymentThanks && user && !isPremium) {
+      setIsActivationOpen(true);
+    }
+  }, [showPaymentThanks, user, isPremium]);
 
   // Load subscriptions (Firestore if logged-in, else localStorage/defaults)
   useEffect(() => {
@@ -440,6 +449,10 @@ export default function App() {
 
       {isLoginOpen && (
         <LoginModal close={() => setIsLoginOpen(false)} />
+      )}
+
+      {isActivationOpen && !isPremium && (
+        <ProActivationModal close={() => setIsActivationOpen(false)} />
       )}
     </div>
   );

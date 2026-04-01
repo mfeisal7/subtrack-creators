@@ -1,8 +1,8 @@
 // src/firebaseConfig.js
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
-// Your Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDo1uK_K0hMDu5vc-6KKfjIBazPar0lYoo",
   authDomain: "subtrack-creators.firebaseapp.com",
@@ -13,8 +13,7 @@ const firebaseConfig = {
   measurementId: "G-4P7F34PLP1",
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Auth only
 export const auth = getAuth(app);
+export const db = getFirestore(app);
