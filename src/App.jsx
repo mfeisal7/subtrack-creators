@@ -7,6 +7,8 @@ import SubscriptionList from "./components/SubscriptionList";
 import Sidebar from "./components/Sidebar";
 import AddSubModal from "./components/AddSubModal";
 import PaywallModal from "./components/PaywallModal";
+import EmailCaptureModal from "./components/EmailCaptureModal";
+import Footer from "./components/Footer";
 import PlanBanner from "./components/PlanBanner";
 import TrustBar from "./components/TrustBar";
 import FeatureGrid from "./components/FeatureGrid";
@@ -87,6 +89,7 @@ export default function App() {
   const [isPremium, setIsPremium] = useState(getInitialPremium);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
+  const [isEmailCaptureOpen, setIsEmailCaptureOpen] = useState(false);
 
   // Load subscriptions (Firestore if logged-in, else localStorage/defaults)
   useEffect(() => {
@@ -163,6 +166,15 @@ export default function App() {
   // Mirror premium into localStorage
   useEffect(() => {
     localStorage.setItem("subtrack_premium", isPremium ? "true" : "false");
+  }, [isPremium]);
+
+  // Email capture: show after 25s for free users who haven't dismissed
+  useEffect(() => {
+    if (isPremium) return;
+    const alreadyDismissed = localStorage.getItem("subtrack_email_dismissed");
+    if (alreadyDismissed) return;
+    const timer = setTimeout(() => setIsEmailCaptureOpen(true), 25000);
+    return () => clearTimeout(timer);
   }, [isPremium]);
 
   // Derived numbers
@@ -396,6 +408,8 @@ export default function App() {
         <ContactSupport />
       </main>
 
+      <Footer />
+
       {/* MODALS */}
       {isModalOpen && (
         <AddSubModal
@@ -408,6 +422,14 @@ export default function App() {
         <PaywallModal
           close={() => setIsPaywallOpen(false)}
           upgrade={handleUpgrade}
+          totalMonthly={totalMonthly}
+        />
+      )}
+
+      {isEmailCaptureOpen && (
+        <EmailCaptureModal
+          close={() => setIsEmailCaptureOpen(false)}
+          totalMonthly={totalMonthly}
         />
       )}
     </div>

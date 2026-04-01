@@ -13,11 +13,14 @@ export default function Navbar({ isPremium, openPaywall }) {
         
         {/* Logo */}
         <a href="/" className="flex items-center gap-2 text-slate-100 font-semibold">
-          <div className="h-7 w-7 rounded-full bg-indigo-500 flex items-center justify-center text-white text-sm">
+          <div className="h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-white text-sm font-bold shadow-md shadow-indigo-500/30">
             S
           </div>
-          <span className="hidden sm:block text-xs tracking-wide text-slate-300">
-            CREATOR SPEND TRACKER
+          <span className="text-sm font-semibold tracking-tight text-slate-100">
+            SubTrack
+          </span>
+          <span className="hidden sm:block text-[10px] tracking-wide text-slate-500 mt-0.5">
+            by creators, for creators
           </span>
         </a>
 

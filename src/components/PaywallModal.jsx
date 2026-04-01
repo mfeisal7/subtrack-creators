@@ -1,6 +1,11 @@
 import { Icons } from "./Icon";
 
-export default function PaywallModal({ close, upgrade }) {
+// Update this number down as you make sales to create real urgency
+const FOUNDING_SPOTS_LEFT = 73;
+
+export default function PaywallModal({ close, upgrade, totalMonthly = 0 }) {
+  const annualBurn = totalMonthly * 12;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 bg-black/80 backdrop-blur-2xl">
       <div className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-indigo-500/40 bg-slate-950/95 shadow-[0_25px_80px_rgba(15,23,42,0.9)]">
@@ -13,7 +18,7 @@ export default function PaywallModal({ close, upgrade }) {
             <div className="flex justify-between items-start gap-4">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-indigo-200/80">
-                  Upgrade
+                  Founding Member Price
                 </p>
                 <h2 className="mt-1 text-xl font-semibold text-slate-50">
                   Unlock Creator Pro
@@ -35,10 +40,36 @@ export default function PaywallModal({ close, upgrade }) {
 
           {/* Body */}
           <div className="px-6 pt-4 pb-5 space-y-4">
+
+            {/* Founding urgency badge */}
+            <div className="flex items-center gap-2 rounded-xl bg-amber-500/10 border border-amber-500/25 px-3 py-2">
+              <span className="text-amber-400 text-sm flex-shrink-0">⚡</span>
+              <p className="text-xs text-amber-200 leading-snug">
+                <span className="font-bold">{FOUNDING_SPOTS_LEFT} founding spots left</span> at $5 lifetime.
+                {" "}Price rises to $9/mo after launch.
+              </p>
+            </div>
+
+            {/* Dynamic spend callout */}
+            {totalMonthly > 0 && (
+              <div className="rounded-xl bg-slate-900/80 border border-slate-700/50 px-4 py-3">
+                <p className="text-[10px] text-slate-400 mb-1 uppercase tracking-wide">Your current tool burn</p>
+                <div className="flex justify-between items-baseline">
+                  <span className="text-2xl font-bold text-slate-50">
+                    ${totalMonthly.toFixed(2)}<span className="text-xs font-normal text-slate-400">/mo</span>
+                  </span>
+                  <span className="text-xs text-slate-400">${annualBurn.toFixed(0)}/yr</span>
+                </div>
+                <p className="text-[10px] text-slate-500 mt-1">
+                  Pro pays for itself in under a day of tool savings.
+                </p>
+              </div>
+            )}
+
             {/* Price */}
             <div className="flex items-end gap-2">
               <p className="text-3xl font-semibold text-slate-50">$5</p>
-              <p className="text-xs text-slate-400 mb-1">one-time, early adopters</p>
+              <p className="text-xs text-slate-400 mb-1">one-time · lifetime access</p>
             </div>
 
             {/* Benefits */}

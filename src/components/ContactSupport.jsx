@@ -1,13 +1,28 @@
 // src/components/ContactSupport.jsx
+import { useState } from "react";
 
 export default function ContactSupport() {
+  const [sent, setSent] = useState(false);
+  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    // Opens mailto with the form contents pre-filled — no backend needed
+    const subject = encodeURIComponent("SubTrack Support / Feedback");
+    const body = encodeURIComponent(
+      `Name: ${formData.name}\nEmail: ${formData.email}\n\n${formData.message}`
+    );
+    window.location.href = `mailto:mfeisal7@gmail.com?subject=${subject}&body=${body}`;
+    setSent(true);
+  }
+
   return (
     <section
       id="contact"
       className="mt-16 mb-10 rounded-3xl border border-slate-800/80 bg-slate-950/80 px-5 py-7 md:px-8 md:py-8 shadow-[0_26px_70px_rgba(0,0,0,0.85)]"
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
-        {/* Contact us */}
+        {/* Left: context */}
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
             Contact
@@ -16,67 +31,82 @@ export default function ContactSupport() {
             Need help or want to say hi?
           </h2>
           <p className="mt-2 text-sm text-slate-400">
-            SubTrack is a tiny indie project. If you run into issues, have a
-            feature request, or just want to share your creator stack, you can
-            reach me directly.
+            SubTrack is a tiny indie project. Feature requests, bug reports, or
+            just want to share your creator stack — I read everything and reply
+            within 24–48 hours on weekdays.
           </p>
 
-          <div className="mt-4 space-y-2 text-sm">
-            <p className="text-slate-300">
-              <span className="text-slate-400">Primary email:</span>{" "}
-              <a
-                href="mailto:mfeisal7@gmail.com?subject=SubTrack%20Support"
-                className="font-medium text-indigo-300 hover:text-indigo-200 underline underline-offset-2"
-              >
-                mfeisal7@gmail.com
-              </a>
-            </p>
-            <p className="text-xs text-slate-500">
-              I aim to reply within 24–48 hours on weekdays.
-            </p>
+          <div className="mt-5 rounded-2xl bg-slate-900/70 border border-slate-700/70 p-4 space-y-3">
+            <h3 className="text-sm font-semibold text-slate-50">Self-serve first</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a
+                  href="#faq"
+                  className="inline-flex items-center gap-1 text-indigo-300 hover:text-indigo-200 underline underline-offset-2"
+                >
+                  View FAQ
+                  <span className="text-[10px] text-slate-500">(pricing, Pro, roadmap)</span>
+                </a>
+              </li>
+              <li className="text-slate-400 text-xs">
+                If something's broken, mention your browser and include a screenshot — it helps a lot.
+              </li>
+            </ul>
           </div>
         </div>
 
-        {/* Support options */}
-        <div className="rounded-2xl bg-slate-900/70 border border-slate-700/70 p-4 md:p-5 space-y-4">
-          <h3 className="text-sm font-semibold text-slate-50">
-            Support and self-serve help
-          </h3>
-          <p className="text-xs text-slate-400">
-            Before emailing, you can quickly check common questions and planned
-            features.
-          </p>
-
-          <ul className="space-y-2 text-sm">
-            <li>
-              <a
-                href="#faq"
-                className="inline-flex items-center gap-1 text-indigo-200 hover:text-indigo-100 underline underline-offset-2"
+        {/* Right: contact form */}
+        <div>
+          {sent ? (
+            <div className="h-full flex flex-col items-center justify-center text-center py-8">
+              <div className="text-3xl mb-3">✉️</div>
+              <p className="text-slate-50 font-semibold">Message sent!</p>
+              <p className="text-sm text-slate-400 mt-1">Your email app should open. I'll reply within 48 hours.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] text-slate-400 mb-1">Name</label>
+                  <input
+                    type="text"
+                    placeholder="Your name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full rounded-xl bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] text-slate-400 mb-1">Email</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="you@example.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full rounded-xl bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-[11px] text-slate-400 mb-1">Message</label>
+                <textarea
+                  required
+                  rows={4}
+                  placeholder="Bug report, feature idea, or just saying hi…"
+                  value={formData.message}
+                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                  className="w-full rounded-xl bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition resize-none"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full rounded-xl bg-indigo-600 hover:bg-indigo-500 py-2.5 text-sm font-semibold text-white transition active:scale-[0.98]"
               >
-                View FAQ
-                <span className="text-[10px] text-slate-400">
-                  (pricing, Pro, roadmap)
-                </span>
-              </a>
-            </li>
-            <li className="text-slate-300">
-              Status page{" "}
-              <span className="text-[11px] text-slate-500">
-                (coming soon)
-              </span>
-            </li>
-            <li className="text-slate-300">
-              Creator tips newsletter{" "}
-              <span className="text-[11px] text-slate-500">
-                (planned)
-              </span>
-            </li>
-          </ul>
-
-          <p className="mt-3 text-[11px] text-slate-500">
-            If something looks broken (PayPal, login, or data), include a quick
-            screenshot and what browser you’re using.
-          </p>
+                Send message →
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </section>
