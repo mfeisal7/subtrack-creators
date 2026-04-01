@@ -66,9 +66,16 @@ export default function EmailCaptureModal({ close, totalMonthly = 0 }) {
               <h2 className="text-xl font-semibold text-slate-50 mb-2">
                 You're in!
               </h2>
-              <p className="text-sm text-slate-300 mb-5">
-                Check your inbox for the free Creator Tool Audit Checklist. We'll also notify you of new SubTrack features.
+              <p className="text-sm text-slate-300 mb-4">
+                Your checklist is ready to download. We'll also keep you updated on new SubTrack features.
               </p>
+              <a
+                href="/creator-tool-audit-checklist.pdf"
+                download
+                className="block w-full rounded-xl bg-gradient-to-r from-indigo-500 to-fuchsia-600 py-2.5 text-sm font-bold text-white shadow-lg shadow-indigo-500/40 hover:brightness-110 transition mb-3"
+              >
+                ↓ Download your free checklist
+              </a>
               <button
                 onClick={close}
                 className="w-full rounded-xl bg-slate-800 border border-slate-700 py-2.5 text-sm text-slate-200 hover:bg-slate-700 transition"
